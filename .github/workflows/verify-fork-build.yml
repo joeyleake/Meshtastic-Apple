@@ -1,0 +1,53 @@
+name: Fork Build Verify (manual)
+
+# Personal verification workflow — NOT part of upstream CI and not meant to be included in a PR to
+# meshtastic/Meshtastic-Apple. Run manually from the Actions tab on your fork to get a real Xcode
+# build + test run without needing a Mac. Delete this file before opening the upstream PR.
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_full_tests:
+        description: "Run the full test suite (slower) instead of just the new waypoint tests"
+        required: false
+        default: "false"
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
+
+      - name: Build (simulator)
+        run: |
+          xcodebuild build \
+            -workspace Meshtastic.xcworkspace \
+            -scheme Meshtastic \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -skipMacroValidation
+
+      - name: Test — new waypoint destination tests
+        if: ${{ github.event.inputs.run_full_tests != 'true' }}
+        run: |
+          xcodebuild test \
+            -workspace Meshtastic.xcworkspace \
+            -scheme Meshtastic \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -skipMacroValidation \
+            -only-testing:MeshtasticTests/WaypointDestinationDerivationTests \
+            -only-testing:MeshtasticTests/WaypointEntityDestinationTests \
+            -only-testing:MeshtasticTests/WaypointRecipientLabelTests \
+            -only-testing:MeshtasticTests/WaypointRecipientPickerFilteringTests
+
+      - name: Test — full suite
+        if: ${{ github.event.inputs.run_full_tests == 'true' }}
+        run: |
+          xcodebuild test \
+            -workspace Meshtastic.xcworkspace \
+            -scheme Meshtastic \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -skipMacroValidation
