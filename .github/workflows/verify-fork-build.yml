@@ -28,7 +28,8 @@ jobs:
             -workspace Meshtastic.xcworkspace \
             -scheme Meshtastic \
             -destination 'platform=macOS,variant=Mac Catalyst' \
-            -skipMacroValidation
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
 
       - name: Test — new waypoint destination tests
         if: ${{ github.event.inputs.run_full_tests != 'true' }}
@@ -38,6 +39,7 @@ jobs:
             -scheme Meshtastic \
             -destination 'platform=macOS,variant=Mac Catalyst' \
             -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             -only-testing:MeshtasticTests/WaypointDestinationDerivationTests \
             -only-testing:MeshtasticTests/WaypointEntityDestinationTests \
             -only-testing:MeshtasticTests/WaypointRecipientLabelTests \
@@ -50,4 +52,5 @@ jobs:
             -workspace Meshtastic.xcworkspace \
             -scheme Meshtastic \
             -destination 'platform=macOS,variant=Mac Catalyst' \
-            -skipMacroValidation
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
