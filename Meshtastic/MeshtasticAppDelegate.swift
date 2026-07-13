@@ -42,7 +42,10 @@ class MeshtasticAppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificat
 			TAKServerManager.shared.initializeOnStartup()
 		}
 		// Request Siri authorization so intent donations work and CarPlay messaging is available.
-		#if !targetEnvironment(macCatalyst)
+		// DO NOT MERGE: disabled for personal sideload testing — a free/personal-team signed build
+		// lacks the com.apple.developer.siri entitlement, and this call hard-crashes
+		// (INPreferences assertThisProcessHasSiriEntitlement) instead of failing gracefully.
+		#if !targetEnvironment(macCatalyst) && false
 		#if targetEnvironment(simulator)
 		Logger.services.info("Skipping Siri authorization request in simulator benchmark harness")
 		#else
