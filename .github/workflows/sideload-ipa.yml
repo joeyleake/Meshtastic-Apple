@@ -1,0 +1,50 @@
+name: Build Sideload IPA (manual)
+
+# Personal verification workflow — NOT part of upstream CI and not meant to be included in a PR to
+# meshtastic/Meshtastic-Apple. Produces an UNSIGNED .ipa for a real iOS device, for sideloading via
+# AltStore/Sideloadly on a non-Mac computer (those tools handle re-signing with a free Apple ID and
+# stripping paid-tier-only entitlements at install time). Delete this file before opening the
+# upstream PR.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26.2
+        run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
+
+      - name: Build (unsigned, real device)
+        run: |
+          xcodebuild build \
+            -workspace Meshtastic.xcworkspace \
+            -scheme Meshtastic \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      - name: Package IPA
+        run: |
+          set -euo pipefail
+          APP_PATH="build/Build/Products/Debug-iphoneos/Meshtastic.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "error: built .app not found at $APP_PATH" >&2
+            find build/Build/Products -maxdepth 2 >&2
+            exit 1
+          fi
+          mkdir Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r Meshtastic-unsigned.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Meshtastic-unsigned-ipa
+          path: Meshtastic-unsigned.ipa
+          retention-days: 7
