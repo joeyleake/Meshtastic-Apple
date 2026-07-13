@@ -578,7 +578,10 @@ struct DeviceOnboarding: View {
 		#if targetEnvironment(macCatalyst)
 		// Siri authorization prompt is not available on Mac Catalyst
 		Logger.services.info("Siri permissions not available on Mac Catalyst")
-		#else
+		// DO NOT MERGE: also disabled below for personal sideload testing — a free/personal-team
+		// signed build lacks the com.apple.developer.siri entitlement, and this call hard-crashes
+		// (INPreferences assertThisProcessHasSiriEntitlement) instead of failing gracefully.
+		#elseif false
 		await withCheckedContinuation { continuation in
 			INPreferences.requestSiriAuthorization { status in
 				switch status {
