@@ -8,7 +8,12 @@
 import Foundation
 import AppIntents
 
-struct ShortcutsProvider: AppShortcutsProvider {
+// Personal sideload build only: AppShortcutsProvider conformance disabled below because the
+// AppIntents framework registers Siri shortcuts at process launch merely from this conformance
+// existing, which hard-crashes (INPreferences assertThisProcessHasSiriEntitlement) on a free/
+// personal-team signed build that lacks the com.apple.developer.siri entitlement. Do not commit
+// this change — revert before merging.
+struct ShortcutsProvider {
 	static var appShortcuts: [AppShortcut] {
 		AppShortcut(intent: ShutDownNodeIntent(),
 					phrases: ["Shut down \(.applicationName) node",
